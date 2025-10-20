@@ -1,4 +1,4 @@
-- Full features :
+- Full features : (10% test, 10% val)
     - Linear : Test AUC: 0.8840, Test Average Precision: 0.8787
     - VGAE : Test AUC: 0.9220, Test Average Precision: 0.9119
     - GAE : Validation AUC: 0.9461, Validation Average Precision: 0.9439
@@ -14,3 +14,20 @@
     - GAE : Validation AUC: 0.9188, Validation Average Precision: 0.9328
     - Classical : TJaccard - AUC: 0.9346 | AP: 0.9307, Pa - AUC: 0.9101 | AP: 0.9213
 
+20% test , 10% val: 
+- Test AUC: 0.8847, Test Average Precision: 0.8814 - Linear
+- Test AUC: 0.9219, Test Average Precision: 0.9151 - VGAE
+- Validation AUC: 0.9480, Validation Average Precision: 0.9443 - GAE
+- Jaccard - AUC: 0.9369 | AP: 0.9340, Pa - AUC: 0.9073 | AP: 0.9189 - Classical
+ 
+20% test , 20% val: 
+- Test AUC: 0.8834, Test Average Precision: 0.8777
+- Test AUC: 0.9147, Test Average Precision: 0.9087
+- Validation AUC: 0.9367, Validation Average Precision: 0.9383
+- Jaccard - AUC: 0.9173 | AP: 0.9137, Pa - AUC: 0.9125 | AP: 0.9214
+
+30% test, 10% val
+- Test AUC: 0.8817, Test Average Precision: 0.8770
+- Test AUC: 0.9126, Test Average Precision: 0.9027
+- Validation AUC: 0.9346, Validation Average Precision: 0.9330
+- Jaccard - AUC: 0.9360 | AP: 0.9326, Pa - AUC: 0.9094 | AP: 0.9201
