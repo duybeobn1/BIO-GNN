@@ -158,7 +158,7 @@ Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test
 
 ### 5.1 - Feature sets analysis
 
-### a. Full Features
+#### a. Full Features
 - **GAE (AUC 0.9461, AP 0.9439)** performs best, showing that deterministic embeddings from GCNs with full node attributes excel.
 - **VGAE (AUC 0.9220, AP 0.9119)** lags slightly behind GAE, likely due to the KL regularization that adds noise.
 - **Linear encoder (AUC 0.8840, AP 0.8787)** is weaker but surprisingly strong, demonstrating that some linear feature transformations capture useful info.
@@ -210,103 +210,10 @@ Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test
 
 ***
 
-### c. **Full Features Enable Best Performance**
+## 6 - Main conclusions
+Here, a quick recap of the main findings of this study : 
 
-**Observation:**
-- GAE with full features achieves the **highest AUC (0.9461)** and AP (0.9439).
-- VGAE with full features also performs well (AUC 0.9220).
-- Linear encoder improves from 0.8302 (numerical only) to 0.8840 (full features).
-
-**Why?**
-- Full features include **categorical encoding (country one-hot)**, which adds relational context not present in pure numerical features.
-- Country encoding helps the model learn **regional connectivity patterns** (e.g., airports in the same country or region are more likely connected).
-- GCN layers aggregate these rich features across neighborhoods, enabling more **expressive latent representations**.
-
-**Implication:**
-- **Categorical features matter**: adding country information boosts performance across all models.
-- This shows that **domain-specific features** (region, category) can significantly enhance learned embeddings.
-
-***
-
-### 4. **Numerical Features Alone Are Weaker**
-
-**Observation:**
-- Dropping categorical features (keeping only population, lat, lon) **decreases all model scores**.
-- GAE drops from 0.9461 to 0.9117 (~3.4% drop).
-- VGAE drops from 0.9220 to 0.8869 (~3.5% drop).
-- Linear drops from 0.8840 to 0.8302 (~5.4% drop).
-
-**Why?**
-- Numerical features (lat, lon, population) are continuous and spatially informative but lack **discrete relational context**.
-- Geographic coordinates might help slightly (nearby airports connect), but without categorical grouping (country), the model cannot easily learn regional clusters.
-- Linear models especially struggle with continuous features alone since they lack the expressiveness to capture nonlinear geographic patterns.
-
-**Implication:**
-- **Categorical encoding** is crucial for capturing **cluster-level patterns** in geographically distributed networks.
-- Pure continuous features are less informative without structural or categorical context.
-
-***
-
-### 5. **No Features: Surprising Strength of Topology**
-
-**Observation:**
-- With **identity matrix** (no features), GAE achieves AUC 0.9188, very close to Jaccard (0.9346).
-- Linear encoder with identity features achieves **AUC 0.9195**, AP 0.9357 — surprisingly the **highest AP** among no-feature models.
-- VGAE performs worst at 0.8702.
-
-**Why?**
-- Identity matrix provides **unique node identifiers** with no semantic information.
-- GAE and Linear models learn embeddings purely from **graph connectivity** via message passing or unique indexing.
-- This shows the **graph structure itself is highly predictive**, and models can still learn meaningful embeddings from topology alone.
-- Linear encoder's strong performance suggests that **one-hot node IDs** + simple transformations can encode positional and topological information effectively [3].
-
-**Implication:**
-- **Topology dominates** link prediction in this dataset.
-- Node features are **helpful but not essential** — the network's connectivity patterns already encode sufficient information.
-- This aligns with classical heuristics' success: they rely purely on topology and perform comparably.
-
-***
-
-### 6. **Linear Encoder: Underrated Baseline**
-
-**Observation:**
-- Linear encoder achieves competitive scores:
-  - Full features: AUC 0.8840
-  - No features (identity): AUC 0.9195, **AP 0.9357** (highest among no-feature models)
-
-**Why?**
-- With identity features, linear transformations can learn **position-specific embeddings** effectively.
-- This simple model acts as a **strong baseline** showing what non-graph-based learning can achieve.
-- It highlights that **model complexity** (GCN layers, variational sampling) must be justified by significant performance gains.
-
-**Implication:**
-- Always include **simple baselines** (linear, logistic regression) in ablation studies.
-- If a linear model performs nearly as well, it questions the necessity of complex architectures.
-
-***
-
-### 7. **Variational Models Struggle with Deterministic Data**
-
-**Observation:**
-- VGAE consistently underperforms GAE across all feature settings.
-- The gap widens with fewer features (no features: GAE 0.9188 vs VGAE 0.8702).
-
-**Why?**
-- VGAE's variational framework assumes **latent uncertainty**, modeling embeddings as distributions rather than points.
-- This is useful when data is **incomplete, noisy, or probabilistic**.
-- However, your airport network has **clean, deterministic edges** (routes either exist or don't), so the added stochasticity introduces noise without benefit.
-
-**Implication:**
-- Use **VGAE for uncertain or probabilistic graphs** (e.g., social networks with ambiguous connections, missing data).
-- For **deterministic graphs**, stick with deterministic models like GAE.
-
-***
-
-## What This Means for Your Study
-
-### Main Conclusions:
-
-1. **Topology is king**: Classical heuristics and no-feature models perform near-optimally, showing link formation is driven by connectivity patterns.
+1. **Topology is powerfull**: Classical heuristics and no-feature models perform near-optimally, showing link formation is driven by connectivity patterns.
 
 2. **Node features add value when rich**: Full features (including categorical) push GAE to the highest performance, but numerical features alone are insufficient.
 
