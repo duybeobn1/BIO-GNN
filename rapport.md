@@ -140,11 +140,9 @@ Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test
 - Classical heuristics remain very competitive.
 
 #### Overall Insights
-
-- **Node features enhance prediction:** full features > numerical only > none, but topology alone (no features) remains very powerful.
-- **GAE > VGAE** on deterministic network datasets, confirming literature showing KL regularization helps less or harms when data isn't noisy.
-- **Linear encoder strong baseline**, particularly with unique node features (identity matrix), can surprisingly rival nonlinear VGAE, highlighting the importance of careful strong baselines.
-- **Classical heuristics remain strong** but can be surpassed using rich features and GCN embeddings.
+- We can validate that our **node features enhance prediction:** full features > numerical only > none.
+- However, we remark that **topology alone (no features) remains very powerful**.
+- **Linear encoder is a strong baseline**, particularly with unique node features (identity matrix). It can surprisingly rival nonlinear VGAE, highlighting the importance of choosing strong baselines to properly evalute the relevance of a model.
 
 ### 5.2 - Overall models comparison
 
@@ -158,33 +156,25 @@ Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test
 
 **Our analysis**
 - VGAE introduces a **KL divergence regularization** term that enforces the latent space to match a prior Gaussian distribution.
-- According to our research, this regularization is beneficial for **noisy or incomplete data**, but your airport network is clean, deterministic, and highly structured.
-- The noise added by stochasticity in VGAE **degrades the predictions** in our case, instead of improving generalization.
+- According to our research, this regularization is beneficial for **sparce, noisy or incomplete data**, but your airport network is clean, deterministic, and highly structured.
+- As a result, in our case, the noise added by stochasticity in VGAE **degrades the predictions** instead of improving generalization.
 
-**Implication:**
-- For **clean, deterministic graphs**, deterministic embeddings (GAE) are preferable.
-- VGAE may be better suited for **sparse, noisy, or uncertain** graphs where uncertainty modeling adds value [1][2].
-
-***
-
-### 2. **Classical Heuristics Are Remarkably Strong**
+#### b. **Classical Heuristics Are Remarkably Strong**
 
 **Observation:**
 - Jaccard coefficient consistently achieves **AUC 0.9346 and AP 0.9307** regardless of feature configuration.
 - Preferential Attachment (PA) achieves **AUC 0.9101 and AP 0.9213**, also stable.
 
-**Why?**
+**Our analysis**
 - Both heuristics rely **purely on graph topology**: neighborhood overlap (Jaccard) and degree product (PA).
+- This is why they remain unchaged, whatever the model used. They are **featureless baselines** because they don't use node attributes at all.
 - Since the airport network connectivity is highly **topological** (airports connect based on existing routes and hub structures), these heuristics naturally capture the dominant link formation mechanism.
-- They are **featureless baselines** and remain unchanged across experiments because they don't use node attributes at all.
-
-**Implication:**
-- Classical heuristics provide a **strong and stable baseline** for link prediction in structurally rich networks.
-- Any learned model must surpass ~0.93 AUC to justify its complexity.
+- Thanks to the strong baseline they offer for link prediction, we know that any learned model must surpass ~0.93 AUC to justify its complexity.
+- Still, we managed to outperform these heuristics can be surpassed using rich features and GCN embeddings.
 
 ***
 
-### 3. **Full Features Enable Best Performance**
+### c. **Full Features Enable Best Performance**
 
 **Observation:**
 - GAE with full features achieves the **highest AUC (0.9461)** and AP (0.9439).
