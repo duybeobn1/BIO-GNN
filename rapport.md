@@ -1,7 +1,7 @@
 
 ## Link Prediction on the Plane Network
 
-### 1. Dataset Description
+## 1. Dataset Description
 
 The dataset represents an **airport network**, where each node corresponds to a city or airport characterized by several features:
 
@@ -15,11 +15,11 @@ After preprocessing, we obtained **3363 nodes** and **27,094 undirected edges**.
 
 ***
 
-### 2. Models and Baselines
+## 2. Models and Baselines
 
 We compared **learning-based methods** (GAE and VGAE) against **classical topological heuristics** commonly used for link prediction.
 
-#### 2.1 Learning-based models
+### 2.1 Learning-based models
 
 - **Graph Autoencoder (GAE)**:  
   A deterministic encoder-decoder model using two GCN layers for node embedding and a dot-product decoder for edge reconstruction.
@@ -27,7 +27,7 @@ We compared **learning-based methods** (GAE and VGAE) against **classical topolo
 - **Variational Graph Autoencoder (VGAE)**:  
   Similar to GAE but introduces Gaussian latent variables (`μ`, `logσ`) and a Kullback-Leibler (KL) divergence term for probabilistic embedding regularization.
 
-#### 2.2 Classical heuristics
+### 2.2 Classical heuristics
 
 - **Jaccard Coefficient**:  
   Measures the ratio of common neighbors to total neighbors between two nodes.
@@ -47,15 +47,28 @@ These baseline methods rely purely on graph connectivity and require no training
 
 ***
 
-### 3. Features sets analysis
+## 3. Features sets analysis
 
 In order to verify which dataset allows for the best performance, we first performed an ablation study on the Features themselves.
 
-#### 3.1 - Experimental setup 
+### 3.1 - Feature sets definition
+
+We decomposed our original node features into 3 distinctive sets : 
+- Full features : all the data available for each airport (each graph node) : population, lat, lon, country.
+- Numerical features only : a subset of our original features, without the country name.
+- No node features : removal of all features for all nodes.
+
+#### No mode features
+
+In order to simulate the "no node feature" mode, we entered an identity matrix defined as `np.eye(df.shape[0], dtype=np.float32)` as node features in our models. This is equivalent to representing each node by a **unique one-hot vector** with no other information.
+
+The idea behind this "empty" feature set is to remove all semantic information to our graph. This forces the model to learn embeddings based on **connectivity patterns alone**, hence from pure **graph structure**. This baseline will help us understand the impact of our features on model performance.
+
+### 3.2 - Experimental setup 
 
 This study was performed using the following setup : 
 
-- **Data split:** 80% train edges, 20% test edges (using `train_test_split_edges` from PyTorch Geometric)
+- **Data split:** 80% train edges, 10% test edges, 10% validation edges (using `train_test_split_edges` from PyTorch Geometric)
 - **Latent dimension:** 16
 - **Optimizer:** Adam
 - **Learning rates tested:** 0.01, 0.001 (best result selected)
@@ -64,7 +77,7 @@ This study was performed using the following setup :
 
 Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test_neg_edge_index`).
 
-#### 3.2 - Results
+### 3.3 - Results
 
 | **Feature Set** | **Model** | **AUC** | **Average Precision (AP)** |
 |------------------|-----------|----------|-----------------------------|
@@ -86,9 +99,9 @@ Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test
 
 ***
 
-### 4. Models comparison
+## 4. Models comparison
 
-#### 4.1 - Experimental setup 
+### 4.1 - Experimental setup 
 
 The setup of this experiment is very similar to the one previously used :
 
@@ -101,147 +114,41 @@ The setup of this experiment is very similar to the one previously used :
 
 Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test_neg_edge_index`).
 
-#### 4.2 - Results
-
-| Model | AUC | AP |
-|--------|------|------|
-| **Jaccard Coefficient** | **0.9329** | **0.9298** |
-| **Preferential Attachment** | 0.9069 | 0.9165 |
-| **Graph Autoencoder (GAE)** | 0.8471 | 0.8515 |
-| **Variational Graph Autoencoder (VGAE)** | 0.8066 | 0.7889 |
+### 4.2 - Results
 
 ***
 
-### 5. Discussion
+## 5 - Experiments Analysis 
 
-#### 5.1 Observations
-1. **Topological heuristics significantly outperform neural models.**  
-   The Jaccard coefficient achieves an AUC of 0.93 and AP of 0.92, clearly surpassing GAE (0.85) and VGAE (0.79). This shows that the connectivity structure of the airport network is highly predictable using local neighborhood overlap alone.
+### 5.1 - Feature sets analysis
 
-2. **GAE outperforms VGAE.**  
-   The deterministic GAE performs better than the variational model. The KL divergence term in VGAE adds stochastic regularization, which helps on noisy data but degrades performance on this clean, deterministic network.
-
-3. **Node features add limited information.**  
-   Attributes like latitude, longitude, and population do not strongly determine whether two airports are connected. Hence, structural heuristics capture the essential link patterns better than learned embeddings.
-
-***
-
-### 6. Interpretation
-
-The discrepancy between classical and learned models stems from **the nature of the data**:
-
-- **Connectivity in this graph is topological**, not semantic. Airports connect mainly based on *existing route overlap* and *hub size*, patterns directly measured by Jaccard and PA.
-- GNN-based models (GAE, VGAE) aggregate node features, but these features (geographic or demographic) do not drive link formation. Their embeddings, therefore, underperform on a purely structural task.
-- Additionally, VGAE’s probabilistic latent space introduces unnecessary noise, while a simple local similarity metric like Jaccard remains sharp and accurate.
-
-***
-
-### 7. Future Work
-
-To improve neural model performance, future experiments could:
-- Include **edge-level features** such as geographic distance or passenger flow.
-- Use deeper or alternative GNN architectures (e.g., GraphSAGE, GAT).
-- Combine heuristic scores (like Jaccard) with node embeddings to form hybrid models.
-- Perform ablation studies on features and GCN depth.
-
-***
-
-### 8. Conclusion
-
-This study shows that for highly structural graphs like the airport network, **classical heuristics remain superior for link prediction**, achieving higher AUC and AP than GAE and VGAE.  
-Neural methods are more valuable when **node attributes carry meaningful relational information** or when **latent non-linear dependencies** exist in the data.  
-
-Nevertheless, the experiments validate the correctness of the GAE/VGAE pipeline and highlight the importance of matching model complexity with the underlying graph properties.
-
-
-
-
-Using an identity matrix like `np.eye(df.shape[0], dtype=np.float32)` as node features in GNNs means exactly that each node is represented by a **unique one-hot vector** with no other information. Here is an extended explanation:
-
-### What it means conceptually
-
-- Each node gets a vector all zeros except for one position (its own index), which is 1.
-- This is like saying "The only feature of this node is that it's node number i."
-- Thus, the feature vectors don't carry any attribute information (like location or population) but uniquely identify nodes as distinct inputs.
-
-### What happens in your GNN with identity features
-
-- The graph convolution layers multiply these identity features by weight matrices and aggregate neighbor information using the adjacency matrix.
-- Since the features are unique for each node and don't carry semantic info, the embeddings come mainly from the **graph structure through message passing**.
-- The network learns embeddings purely from connectivity without help from node attributes.
-
-### Why use identity features?
-
-- To simulate **"no feature"** scenario so you can measure how much your model depends on node attributes versus pure graph structure.
-- Helps to isolate the effect of graph topology in link prediction or node classification tasks.
-- If performance with identity features is similar to or better than using real node features, it suggests the features add little useful signal.
-
-### Analogies
-
-- Identity matrix features are like "one-hot encoded node IDs".
-- Without additional features, your model uses graph **connectivity patterns alone** to learn representations.
-
-
-means giving your model **only unique node IDs and no attribute data**. This tests how well graph neural networks can predict links based purely on topology without attribute guidance.
-
-This is a common baseline to evaluate the contribution and necessity of node features in graph ML tasks.
-
-
-
-
-### 1. Full Features
+### a. Full Features
 - **GAE (AUC 0.9461, AP 0.9439)** performs best, showing that deterministic embeddings from GCNs with full node attributes excel.
 - **VGAE (AUC 0.9220, AP 0.9119)** lags slightly behind GAE, likely due to the KL regularization that adds noise.
 - **Linear encoder (AUC 0.8840, AP 0.8787)** is weaker but surprisingly strong, demonstrating that some linear feature transformations capture useful info.
 - **Classical heuristics (Jaccard AUC 0.9346, PA AUC 0.9101)** do well too, but GAE improves further by incorporating node features.
 
-### 2. Numerical Features Only
+#### b. Numerical Features Only
 - All scores drop compared to full features, indicating **categorical features (e.g., country encoding) add predictive value**.
 - GAE (AUC 0.9117) outperforms classical PA (AUC 0.9101) , but VGAE underpeforms classical 
 - Linear drops more steeply (AUC 0.8302), showing the benefit of nonlinear modeling for numeric-only features.
 
-### 3. No Node Features (Identity matrix)
+#### c. No Node Features (Identity matrix)
 - Linear encoder surprisingly performs very well (AUC 0.9195, AP 0.9357), showing that unique node identifiers plus simple linear maps can still encode connectivity well.
 - GAE (AUC 0.9188, AP 0.9328) also performs strongly, close to heuristics.
 - VGAE slightly worse (AUC 0.8702); stochastic sampling may not help here.
 - Classical heuristics remain very competitive.
 
-### Overall Insights
+#### Overall Insights
 
-- **Node features enhance prediction:** full features > numerical only > none, but topology alone (no features) remains powerful.
+- **Node features enhance prediction:** full features > numerical only > none, but topology alone (no features) remains very powerful.
 - **GAE > VGAE** on deterministic network datasets, confirming literature showing KL regularization helps less or harms when data isn't noisy.
 - **Linear encoder strong baseline**, particularly with unique node features (identity matrix), can surprisingly rival nonlinear VGAE, highlighting the importance of careful strong baselines.
 - **Classical heuristics remain strong** but can be surpassed using rich features and GCN embeddings.
 
+### 5.2 - Overall models comparison
 
-
-## 📊 Comprehensive Result Breakdown
-
-### Summary Table
-
-| **Feature Set** | **Model** | **AUC** | **AP** |
-|-----------------|-----------|---------|--------|
-| **Full features** | GAE | **0.9461** | **0.9439** |
-| | VGAE | 0.9220 | 0.9119 |
-| | Linear | 0.8840 | 0.8787 |
-| | Jaccard | 0.9346 | 0.9307 |
-| | PA | 0.9101 | 0.9213 |
-| **Numerical only** | GAE | 0.9117 | 0.9089 |
-| | VGAE | 0.8869 | 0.8746 |
-| | Linear | 0.8302 | 0.8193 |
-| | Jaccard | 0.9346 | 0.9307 |
-| | PA | 0.9101 | 0.9213 |
-| **No features** | GAE | 0.9188 | 0.9328 |
-| | VGAE | 0.8702 | 0.8820 |
-| | Linear | **0.9195** | **0.9357** |
-| | Jaccard | 0.9346 | 0.9307 |
-| | PA | 0.9101 | 0.9213 |
-
-***
-
-## 🔍 Detailed Insights
-
-### 1. **GAE Consistently Outperforms VGAE**
+#### a. **GAE Consistently Outperforms VGAE**
 
 **Observation:**
 - GAE outperforms VGAE in **all feature settings** (full, numerical, none).
@@ -249,10 +156,10 @@ This is a common baseline to evaluate the contribution and necessity of node fea
 - With numerical only: GAE 0.9117 vs VGAE 0.8869 (~0.025 difference).
 - With no features: GAE 0.9188 vs VGAE 0.8702 (~0.049 difference).
 
-**Why?**
+**Our analysis**
 - VGAE introduces a **KL divergence regularization** term that enforces the latent space to match a prior Gaussian distribution.
-- This regularization is beneficial for **noisy or incomplete data**, but your airport network is clean, deterministic, and structured.
-- The added stochasticity in VGAE (sampling from $$ z \sim \mathcal{N}(\mu, \sigma^2) $$) introduces **noise that degrades predictions** rather than improving generalization.
+- According to our research, this regularization is beneficial for **noisy or incomplete data**, but your airport network is clean, deterministic, and highly structured.
+- The noise added by stochasticity in VGAE **degrades the predictions** in our case, instead of improving generalization.
 
 **Implication:**
 - For **clean, deterministic graphs**, deterministic embeddings (GAE) are preferable.
@@ -391,4 +298,3 @@ This is a common baseline to evaluate the contribution and necessity of node fea
 - **Highlight topology dominance**: Explain why heuristics and no-feature models perform well.
 - **Justify model choice**: Argue for GAE over VGAE based on deterministic data characteristics.
 - **Discuss feature engineering**: Stress the value of categorical encoding in geographic networks.
-
