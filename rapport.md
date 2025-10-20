@@ -47,20 +47,61 @@ These baseline methods rely purely on graph connectivity and require no training
 
 ***
 
-### 3. Experimental Setup
+### 3. Features sets analysis
+
+In order to verify which dataset allows for the best performance, we first performed an ablation study on the Features themselves.
+
+#### 3.1 - Experimental setup 
+
+This study was performed using the following setup : 
 
 - **Data split:** 80% train edges, 20% test edges (using `train_test_split_edges` from PyTorch Geometric)
 - **Latent dimension:** 16
 - **Optimizer:** Adam
-- **Learning rates tested:** 0.01, 0.001
+- **Learning rates tested:** 0.01, 0.001 (best result selected)
 - **Epochs:** 600
 - **Evaluation metrics:** Area Under ROC Curve (AUC) and Average Precision (AP)
 
 Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test_neg_edge_index`).
 
+#### 3.2 - Results
+
+| **Feature Set** | **Model** | **AUC** | **Average Precision (AP)** |
+|------------------|-----------|----------|-----------------------------|
+| **Full features** | Linear | 0.8840 | 0.8787 |
+|  | VGAE | 0.9220 | 0.9119 |
+|  | GAE | **0.9461** | **0.9439** |
+|  | Jaccard (classical) | 0.9346 | 0.9307 |
+|  | Preferential Attachment (classical) | 0.9101 | 0.9213 |
+| **Numerical features only** | Linear | 0.8302 | 0.8193 |
+|  | VGAE | 0.8869 | 0.8746 |
+|  | GAE | **0.9117** | **0.9089** |
+|  | Jaccard (classical) | 0.9346 | 0.9307 |
+|  | Preferential Attachment (classical) | 0.9101 | 0.9213 |
+| **No node features** | Linear | 0.9195 | 0.9357 |
+|  | VGAE | 0.8702 | 0.8820 |
+|  | GAE | 0.9188 | 0.9328 |
+|  | Jaccard (classical) | **0.9346** | **0.9307** |
+|  | Preferential Attachment (classical) | 0.9101 | 0.9213 |
+
 ***
 
-### 4. Results
+### 4. Models comparison
+
+#### 4.1 - Experimental setup 
+
+The setup of this experiment is very similar to the one previously used :
+
+- **Data split:** different variations compared
+- **Latent dimension:** 16
+- **Optimizer:** Adam
+- **Learning rates tested:** 0.01, 0.001 (best result selected)
+- **Epochs:** 600
+- **Evaluation metrics:** Area Under ROC Curve (AUC) and Average Precision (AP)
+
+Both AUC and AP were computed on the test link set (`test_pos_edge_index`, `test_neg_edge_index`).
+
+#### 4.2 - Results
 
 | Model | AUC | AP |
 |--------|------|------|
