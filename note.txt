@@ -1,0 +1,16 @@
+- Full features :
+    - Linear : Test AUC: 0.8840, Test Average Precision: 0.8787
+    - VGAE : Test AUC: 0.9220, Test Average Precision: 0.9119
+    - GAE : Validation AUC: 0.9461, Validation Average Precision: 0.9439
+    - Classical approach : Jaccard - AUC: 0.9346 | AP: 0.9307, Pa - AUC: 0.9101 | AP: 0.9213
+- Numerical features :
+    - Linear : Test AUC: 0.8302, Test Average Precision: 0.8193
+    - VGAE : Test AUC: 0.8869, Test Average Precision: 0.8746
+    - GAE : Validation AUC: 0.9117, Validation Average Precision: 0.9089
+    - Classical approach : Jaccard - AUC: 0.9346 | AP: 0.9307, Pa - AUC: 0.9101 | AP: 0.9213
+- No node features 
+    - Linear: Test AUC: 0.9195, Test Average Precision: 0.9357
+    - VGAE : Test AUC: 0.8702, Test Average Precision: 0.8820
+    - GAE : Validation AUC: 0.9188, Validation Average Precision: 0.9328
+    - Classical : TJaccard - AUC: 0.9346 | AP: 0.9307, Pa - AUC: 0.9101 | AP: 0.9213
+

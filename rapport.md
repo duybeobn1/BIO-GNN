@@ -112,3 +112,36 @@ Neural methods are more valuable when **node attributes carry meaningful relatio
 
 Nevertheless, the experiments validate the correctness of the GAE/VGAE pipeline and highlight the importance of matching model complexity with the underlying graph properties.
 
+
+
+
+Using an identity matrix like `np.eye(df.shape[0], dtype=np.float32)` as node features in GNNs means exactly that each node is represented by a **unique one-hot vector** with no other information. Here is an extended explanation:
+
+### What it means conceptually
+
+- Each node gets a vector all zeros except for one position (its own index), which is 1.
+- This is like saying "The only feature of this node is that it's node number i."
+- Thus, the feature vectors don't carry any attribute information (like location or population) but uniquely identify nodes as distinct inputs.
+
+### What happens in your GNN with identity features
+
+- The graph convolution layers multiply these identity features by weight matrices and aggregate neighbor information using the adjacency matrix.
+- Since the features are unique for each node and don't carry semantic info, the embeddings come mainly from the **graph structure through message passing**.
+- The network learns embeddings purely from connectivity without help from node attributes.
+
+### Why use identity features?
+
+- To simulate **"no feature"** scenario so you can measure how much your model depends on node attributes versus pure graph structure.
+- Helps to isolate the effect of graph topology in link prediction or node classification tasks.
+- If performance with identity features is similar to or better than using real node features, it suggests the features add little useful signal.
+
+### Analogies
+
+- Identity matrix features are like "one-hot encoded node IDs".
+- Without additional features, your model uses graph **connectivity patterns alone** to learn representations.
+
+
+means giving your model **only unique node IDs and no attribute data**. This tests how well graph neural networks can predict links based purely on topology without attribute guidance.
+
+This is a common baseline to evaluate the contribution and necessity of node features in graph ML tasks.
+
